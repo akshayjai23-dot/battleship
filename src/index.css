@@ -53,6 +53,14 @@ main {
   }
 }
 
+/* The two boards stack, so a short window is the binding constraint, not a narrow
+   one: shrink the squares until both grids clear the fold on a 768px-tall screen. */
+@media (max-height: 46rem) {
+  :root {
+    --cell: 1.25rem;
+  }
+}
+
 header {
   display: flex;
   align-items: baseline;

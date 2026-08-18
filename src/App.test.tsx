@@ -203,6 +203,27 @@ describe('playing', () => {
     ).toHaveLength(2);
   });
 
+  it('shows the newest move first without renumbering the older ones', async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<App initialSeed={SEED} />);
+    await startGame(user);
+
+    await user.click(enemyBoard().getByRole('button', { name: 'A1, water' }));
+    await letAiMove();
+    await user.click(enemyBoard().getByRole('button', { name: 'B1, water' }));
+    await letAiMove();
+
+    const log = screen.getByRole('list', { name: 'Move log' });
+    const entries = within(log).getAllByRole('listitem');
+
+    expect(entries[0]).toHaveTextContent('AI fired');
+    expect(entries[3]).toHaveTextContent('You fired at A1');
+    // `reversed` counting down from the move count is what keeps the first move
+    // numbered 1 while the newest move sits at the top of the list.
+    expect(log).toHaveAttribute('start', String(entries.length));
+    expect(log).toHaveAttribute('reversed');
+  });
+
   it('locks the enemy board while the AI is thinking', async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<App initialSeed={SEED} />);

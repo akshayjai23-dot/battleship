@@ -69,5 +69,47 @@ Two rules keep this document honest:
 - **Regression test** — `src/App.test.tsx`, "keeps the chosen ship when the reducer
   refuses a placement", committed red before the fix.
 
-Worth noting for the write-up: this one was caused by the previous fix, which is exactly
-why each entry above names the test that now holds the behaviour in place.
+Worth noting: this one was caused by the fix for bug 2, which is exactly why every entry
+here names the test that now holds the behaviour in place.
+
+## 4. Half the game was below the fold on a 1024x768 screen
+
+- **Symptom** — found by playing the game in a real 1024x768 browser window at 100% zoom,
+  not in the tests. During setup the "Start game" button sat at y≈958 in a 639px-tall
+  viewport, so a first-time player saw a board and no way to begin. After the first
+  attempt at a fix the button fitted but the boards did not: enemy rows 7–10 were off
+  screen, so firing at half the grid meant scrolling the page first.
+- **Root cause** — three separate causes with one theme, that the layout was only ever
+  looked at on a large screen. The page was a single column, so the two 10x10 grids
+  stacked to 797px on their own. The status panel rendered an empty fleet list and an
+  empty move-log box throughout setup, when neither can say anything yet. And the square
+  size was fixed against viewport _width_, when for a stacked pair of boards the binding
+  constraint is viewport _height_.
+- **Fix** — the boards and the panels became two columns; the fleet list and move log are
+  rendered only once a game is in progress; and `--cell` now shrinks to `1.5rem` under
+  `@media (max-height: 46rem)`, which also lets the two boards sit side by side. Measured
+  at a 992x639 viewport: `scrollHeight` 639 == `clientHeight` 639, both boards and every
+  control fully in view.
+- **Regression test** — none automated, honestly. This is a CSS-in-a-real-browser defect
+  and jsdom has no layout engine, so a unit test asserting it would prove nothing. It is
+  covered instead by a documented manual check at 1024x768 @100% in
+  `.agents/skills/testing-battleship-ui/SKILL.md`.
+
+## 5. The boards jumped a row on every shot, and the move log renumbered itself
+
+- **Symptom** — two smaller findings from the same play session. Each new log line grew
+  the panel, which pushed the boards down, so the square under the cursor changed between
+  one shot and the next. Separately, the log listed the newest move first but numbered
+  the list from 1 downwards, so a given move was renumbered after every shot and "1"
+  meant "most recent" rather than "first".
+- **Root cause** — the log had no height of its own and simply grew with its contents.
+  The numbering came free from `<ol>`, which counts from the top of a list that was being
+  rendered in reverse.
+- **Fix** — the log has a fixed `8rem` height and scrolls internally, so the layout is
+  the same size whether it holds one entry or thirty; and the list uses
+  `reversed start={log.length}`, which counts _down_ from the move count so the oldest
+  entry keeps the number 1.
+- **Regression test** — `src/App.test.tsx`, "shows the newest move first without
+  renumbering the older ones". The fixed height is CSS, so it is verified by the same
+  manual check as bug 4 (measured: the log stayed 128px and the enemy board's document
+  position was unchanged before and after every shot).

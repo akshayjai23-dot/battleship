@@ -33,6 +33,10 @@ function describeEntry(entry: LogEntry): string {
 }
 
 export function StatusPanel({ state }: { readonly state: GameState }) {
+  // Neither panel says anything during setup — no ship can be sunk and no shot fired —
+  // so they are left out until the game starts, which also keeps setup on one screen.
+  const playing = state.phase.name !== 'setup';
+
   return (
     <section className="panel" aria-label="Game status">
       {/* Announced to screen readers so the AI's move is not a purely visual event. */}
@@ -41,19 +45,23 @@ export function StatusPanel({ state }: { readonly state: GameState }) {
       </p>
       {state.notice !== undefined && <p className="notice">{state.notice}</p>}
 
-      <div className="fleets">
-        <FleetStatus title="Your fleet" fleet={state.human.fleet} />
-        <FleetStatus title="Enemy fleet" fleet={state.ai.fleet} />
-      </div>
+      {playing && (
+        <>
+          <div className="fleets">
+            <FleetStatus title="Your fleet" fleet={state.human.fleet} />
+            <FleetStatus title="Enemy fleet" fleet={state.ai.fleet} />
+          </div>
 
-      <h2>Move log</h2>
-      {/* Newest first, but counted from the first move: `reversed` numbers the list
-          down from the move count, so a move keeps its number as the log grows. */}
-      <ol className="log" aria-label="Move log" reversed start={state.log.length}>
-        {[...state.log].reverse().map((entry, index) => (
-          <li key={state.log.length - index}>{describeEntry(entry)}</li>
-        ))}
-      </ol>
+          <h2>Move log</h2>
+          {/* Newest first, but counted from the first move: `reversed` numbers the list
+              down from the move count, so a move keeps its number as the log grows. */}
+          <ol className="log" aria-label="Move log" reversed start={state.log.length}>
+            {[...state.log].reverse().map((entry, index) => (
+              <li key={state.log.length - index}>{describeEntry(entry)}</li>
+            ))}
+          </ol>
+        </>
+      )}
     </section>
   );
 }

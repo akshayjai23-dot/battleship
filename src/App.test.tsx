@@ -242,9 +242,8 @@ describe('playing', () => {
     // The abandoned game's timer must not fire into the fresh one.
     expect(screen.getByRole('status')).toHaveTextContent('Place your fleet to begin.');
     expect(ownBoard().queryByRole('button', { name: /hit|miss/ })).toBeNull();
-    expect(
-      within(screen.getByRole('list', { name: 'Move log' })).queryAllByRole('listitem'),
-    ).toHaveLength(0);
+    // The log belongs to a game in progress, so setup does not show one at all.
+    expect(screen.queryByRole('list', { name: 'Move log' })).toBeNull();
   });
 
   it('is playable with the keyboard alone', async () => {

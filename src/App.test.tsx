@@ -128,6 +128,18 @@ describe('setup', () => {
     expect(ownBoard().queryByRole('button', { name: /your ship/ })).toBeNull();
   });
 
+  it('keeps the chosen ship when the reducer refuses a placement', async () => {
+    const user = userEvent.setup();
+    render(<App initialSeed={SEED} />);
+
+    await user.click(screen.getByRole('button', { name: 'Cruiser (3)' }));
+    await user.click(ownBoard().getByRole('button', { name: 'J1, water' }));
+    await user.click(ownBoard().getByRole('button', { name: 'A1, water' }));
+
+    // The Cruiser, not the Carrier: a rejected click must not forget what the player picked.
+    expect(ownBoard().getAllByRole('button', { name: /your ship/ })).toHaveLength(3);
+  });
+
   it('still accepts placements after the board is cleared', async () => {
     // Regression: the selected ship was component state that emptied once the fleet was
     // full, so after Clear board every click on the grid did nothing at all.

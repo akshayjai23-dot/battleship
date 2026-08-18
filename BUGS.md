@@ -33,3 +33,23 @@ Two rules keep this document honest:
   still visible on the preview squares that fall outside the placed ship.
 - **Regression test** — `src/ui/cells.test.ts`, "never lets a preview hide a ship that
   is already placed". Committed red in `c1a9a75`, fixed in the commit that follows it.
+
+## 2. Setup went dead after the fleet was placed and then cleared
+
+- **Symptom** — place all five ships by hand, press "Clear board", then click the grid:
+  nothing happens. No ship appears, no message explains why. The same happened after
+  "New game" from a finished setup, and a click straight after "Random layout" reported
+  "the Carrier is already on the board" instead of placing anything.
+- **Root cause** — the ship being placed was React component state that auto-advanced
+  after each placement, and became `undefined` once the fifth ship was placed. The
+  reducer actions that empty or replace the fleet — `resetPlacement`, `newGame`,
+  `randomizePlacement`, `removeShip` — knew nothing about that component state, so it
+  was left pointing at nothing (or at a ship already on the board) while the board it
+  described had changed underneath it. Two sources of truth for the same fact.
+- **Fix** — the selection is now derived from the fleet rather than stored: the player's
+  explicit choice is honoured only while that ship is still unplaced, and otherwise
+  falls back to `unplacedKinds(fleet)[0]`. Any reducer action that changes the fleet
+  self-corrects the UI, because there is no longer a second copy to fall out of step.
+- **Regression test** — `src/App.test.tsx`, "still accepts placements after the board is
+  cleared" and "starts placing the removed ship again after it is taken off the board".
+  Both committed red before the fix.

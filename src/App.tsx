@@ -20,24 +20,28 @@ export function seedFromLocation(search: string): number {
 export default function App({ initialSeed }: { readonly initialSeed?: number }) {
   const [seed] = useState(() => initialSeed ?? seedFromLocation(window.location.search));
   const [state, dispatch] = useGame(seed);
-  const [selected, setSelected] = useState<ShipKind | undefined>('carrier');
+  const [chosen, setChosen] = useState<ShipKind | undefined>(undefined);
   const [hovered, setHovered] = useState<Coord | undefined>(undefined);
 
   const setup = state.phase.name === 'setup';
+  // The ship being placed is derived from the fleet rather than held in state: the
+  // player's choice is honoured only while that ship is still unplaced, and otherwise
+  // falls back to the next one. Clearing, randomising or restarting therefore cannot
+  // strand the board with a selection that no longer means anything.
+  const unplaced = unplacedKinds(state.human.fleet);
+  const selected =
+    chosen !== undefined && unplaced.includes(chosen) ? chosen : unplaced[0];
   const preview = setup ? previewFor(state, selected, hovered) : undefined;
 
   function place(origin: Coord) {
     if (!selected) return;
-    const orientation = state.placementOrientation;
-    dispatch({ type: 'placeShip', kind: selected, origin, orientation });
-    // Move on to the next ship so placing a fleet is five clicks, not ten. The reducer
-    // is still the authority: if it refuses the placement, the selection stays put.
-    if (placementError(state.human.fleet, selected, origin, orientation) === undefined) {
-      const remaining = unplacedKinds(state.human.fleet).filter(
-        (kind) => kind !== selected,
-      );
-      setSelected(remaining[0]);
-    }
+    dispatch({
+      type: 'placeShip',
+      kind: selected,
+      origin,
+      orientation: state.placementOrientation,
+    });
+    setChosen(undefined);
   }
 
   return (
@@ -74,7 +78,7 @@ export default function App({ initialSeed }: { readonly initialSeed?: number }) 
           fleet={state.human.fleet}
           selected={selected}
           orientation={state.placementOrientation}
-          onSelect={setSelected}
+          onSelect={setChosen}
           dispatch={dispatch}
         />
       )}

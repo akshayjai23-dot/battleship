@@ -41,7 +41,6 @@ export default function App({ initialSeed }: { readonly initialSeed?: number }) 
       origin,
       orientation: state.placementOrientation,
     });
-    setChosen(undefined);
   }
 
   return (

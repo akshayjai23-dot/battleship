@@ -53,3 +53,21 @@ Two rules keep this document honest:
 - **Regression test** — `src/App.test.tsx`, "still accepts placements after the board is
   cleared" and "starts placing the removed ship again after it is taken off the board".
   Both committed red before the fix.
+
+## 3. A refused placement forgot which ship the player had picked
+
+- **Symptom** — pick the Cruiser, click a square where it does not fit, read the "does not
+  fit there" notice, then click a square where it does: the **Carrier** goes down instead
+  of the Cruiser.
+- **Root cause** — introduced by the fix for bug 2. `place()` cleared the player's explicit
+  choice after every click, on the assumption that the click had succeeded. When the
+  reducer refused the placement the fleet was unchanged, so the derived selection fell
+  back to the first unplaced ship and quietly overrode the player.
+- **Fix** — dropped the reset entirely. It was never needed: a ship that has just been
+  placed leaves `unplacedKinds(fleet)`, so the derived selection advances on its own,
+  and a refused placement now leaves the choice exactly where the player left it.
+- **Regression test** — `src/App.test.tsx`, "keeps the chosen ship when the reducer
+  refuses a placement", committed red before the fix.
+
+Worth noting for the write-up: this one was caused by the previous fix, which is exactly
+why each entry above names the test that now holds the behaviour in place.

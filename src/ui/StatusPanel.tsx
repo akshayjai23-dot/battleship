@@ -47,7 +47,9 @@ export function StatusPanel({ state }: { readonly state: GameState }) {
       </div>
 
       <h2>Move log</h2>
-      <ol className="log" aria-label="Move log">
+      {/* Newest first, but counted from the first move: `reversed` numbers the list
+          down from the move count, so a move keeps its number as the log grows. */}
+      <ol className="log" aria-label="Move log" reversed start={state.log.length}>
         {[...state.log].reverse().map((entry, index) => (
           <li key={state.log.length - index}>{describeEntry(entry)}</li>
         ))}

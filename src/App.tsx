@@ -52,35 +52,39 @@ export default function App({ initialSeed }: { readonly initialSeed?: number }) 
         </button>
       </header>
 
-      <StatusPanel state={state} />
+      <div className="layout">
+        <div className="boards">
+          <Board
+            title="Your waters"
+            cells={ownCells(state.human, preview)}
+            disabled={!setup}
+            onSelect={place}
+            onHover={setHovered}
+          />
+          <Board
+            title="Enemy waters"
+            cells={enemyCells(state.ai)}
+            // Guarded again in the reducer; disabling here is only to stop the pointer
+            // inviting a click that would be rejected anyway.
+            disabled={state.phase.name !== 'playerTurn'}
+            onSelect={(coord) => dispatch({ type: 'playerFire', coord })}
+          />
+        </div>
 
-      <div className="boards">
-        <Board
-          title="Your waters"
-          cells={ownCells(state.human, preview)}
-          disabled={!setup}
-          onSelect={place}
-          onHover={setHovered}
-        />
-        <Board
-          title="Enemy waters"
-          cells={enemyCells(state.ai)}
-          // Guarded again in the reducer; disabling here is only to stop the pointer
-          // inviting a click that would be rejected anyway.
-          disabled={state.phase.name !== 'playerTurn'}
-          onSelect={(coord) => dispatch({ type: 'playerFire', coord })}
-        />
+        {/* Beside the boards rather than below them, so the whole game fits one screen. */}
+        <aside className="sidebar">
+          <StatusPanel state={state} />
+          {setup && (
+            <SetupPanel
+              fleet={state.human.fleet}
+              selected={selected}
+              orientation={state.placementOrientation}
+              onSelect={setChosen}
+              dispatch={dispatch}
+            />
+          )}
+        </aside>
       </div>
-
-      {setup && (
-        <SetupPanel
-          fleet={state.human.fleet}
-          selected={selected}
-          orientation={state.placementOrientation}
-          onSelect={setChosen}
-          dispatch={dispatch}
-        />
-      )}
 
       <footer>Seed {state.seed}</footer>
     </main>

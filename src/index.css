@@ -7,6 +7,8 @@
   --miss: #94a3b8;
   --preview: #22c55e;
   --invalid: #f97316;
+  /* Squares shrink on narrower screens so both boards and the panel stay on one screen. */
+  --cell: 1.75rem;
 
   font-family: system-ui, sans-serif;
   color-scheme: light dark;
@@ -17,13 +19,38 @@ body {
   margin: 0;
   display: flex;
   justify-content: center;
-  padding: 2rem 1rem;
+  padding: 1rem;
 }
 
 main {
   width: min(72rem, 100%);
   display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.layout {
+  display: grid;
   gap: 1.5rem;
+  align-items: start;
+}
+
+.sidebar {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+@media (min-width: 60rem) {
+  .layout {
+    grid-template-columns: auto minmax(16rem, 1fr);
+  }
+}
+
+@media (min-width: 78rem) {
+  :root {
+    --cell: 2rem;
+  }
 }
 
 header {
@@ -54,12 +81,12 @@ h3 {
 .boards {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: 1.25rem repeat(10, 2rem);
+  grid-template-columns: 1.25rem repeat(10, var(--cell));
   gap: 2px;
 }
 
@@ -72,8 +99,8 @@ h3 {
 }
 
 .cell {
-  width: 2rem;
-  height: 2rem;
+  width: var(--cell);
+  height: var(--cell);
   padding: 0;
   border: 1px solid rgb(0 0 0 / 15%);
   border-radius: 2px;
@@ -133,8 +160,9 @@ h3 {
 
 .fleets {
   display: flex;
-  gap: 2rem;
-  margin: 0.75rem 0;
+  gap: 1.5rem;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
 }
 
 .fleets ul,
@@ -157,7 +185,8 @@ h3 {
 }
 
 .log {
-  max-height: 9rem;
+  /* Fixed, not max-height: a growing log must not shift the boards under the cursor. */
+  height: 8rem;
   overflow-y: auto;
   margin: 0;
   padding-left: 1.25rem;

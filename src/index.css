@@ -57,7 +57,7 @@ main {
    one: shrink the squares until both grids clear the fold on a 768px-tall screen. */
 @media (max-height: 46rem) {
   :root {
-    --cell: 1.25rem;
+    --cell: 1.5rem;
   }
 }
 

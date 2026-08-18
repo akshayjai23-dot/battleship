@@ -128,6 +128,34 @@ describe('setup', () => {
     expect(ownBoard().queryByRole('button', { name: /your ship/ })).toBeNull();
   });
 
+  it('still accepts placements after the board is cleared', async () => {
+    // Regression: the selected ship was component state that emptied once the fleet was
+    // full, so after Clear board every click on the grid did nothing at all.
+    const user = userEvent.setup();
+    render(<App initialSeed={SEED} />);
+
+    for (const square of ['A1', 'A3', 'A5', 'A7', 'A9']) {
+      await user.click(ownBoard().getByRole('button', { name: `${square}, water` }));
+    }
+    expect(screen.getByRole('button', { name: 'Start game' })).toBeEnabled();
+
+    await user.click(screen.getByRole('button', { name: 'Clear board' }));
+    await user.click(ownBoard().getByRole('button', { name: 'A1, water' }));
+
+    expect(ownBoard().getAllByRole('button', { name: /your ship/ })).toHaveLength(5);
+  });
+
+  it('starts placing the removed ship again after it is taken off the board', async () => {
+    const user = userEvent.setup();
+    render(<App initialSeed={SEED} />);
+
+    await user.click(screen.getByRole('button', { name: 'Random layout' }));
+    await user.click(screen.getByRole('button', { name: 'Remove Destroyer' }));
+    await user.click(ownBoard().getByRole('button', { name: 'A10, water' }));
+
+    expect(ownBoard().getAllByRole('button', { name: /your ship/ })).toHaveLength(17);
+  });
+
   it('hides the enemy fleet entirely', async () => {
     render(<App initialSeed={SEED} />);
     expect(enemyBoard().queryByRole('button', { name: /your ship/ })).toBeNull();

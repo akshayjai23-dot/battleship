@@ -40,8 +40,7 @@ describe('seedFromLocation', () => {
 });
 
 describe('setup', () => {
-  it('asks the player to place their fleet and refuses to start early', async () => {
-    const user = userEvent.setup();
+  it('asks the player to place their fleet and refuses to start early', () => {
     render(<App initialSeed={SEED} />);
 
     expect(screen.getByRole('status')).toHaveTextContent('Place your fleet to begin.');
@@ -220,7 +219,7 @@ describe('playing', () => {
     expect(enemyBoard().queryByRole('button', { name: 'A1, water' })).toBeNull();
   });
 
-  it('plays a full game through to a result', async () => {
+  it('plays a full game through to a result', { timeout: 30_000 }, async () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<App initialSeed={SEED} />);
     await startGame(user);

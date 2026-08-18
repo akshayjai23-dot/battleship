@@ -39,6 +39,8 @@ export function ownCells(board: PlayerBoard, preview: Preview | undefined): Cell
     const key = toKey(coord);
     const ship = shipAt(board.fleet, coord);
     const mark = board.shots[key];
+    // Order matters: damage, then the player's own ships, then the preview. A preview
+    // must never paint over something real, or the fleet appears to vanish under it.
     const state: CellState =
       mark === 'hit'
         ? ship && isSunk(ship)
@@ -46,7 +48,9 @@ export function ownCells(board: PlayerBoard, preview: Preview | undefined): Cell
           : 'hit'
         : mark === 'miss'
           ? 'miss'
-          : (previewed[key] ?? (ship ? 'ship' : 'water'));
+          : ship
+            ? 'ship'
+            : (previewed[key] ?? 'water');
     return { coord, key, name: formatCoord(coord), state };
   });
 }

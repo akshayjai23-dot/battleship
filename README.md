@@ -2,7 +2,8 @@
 
 A browser Battleship game against an AI opponent.
 
-- **Play:** _(deployment link added in PR #1 once hosting is set up)_
+- **Play:** https://battleship-five-chi.vercel.app/ (the UI lands in PR #3; until then this
+  serves the scaffold placeholder)
 - **Bug log:** [BUGS.md](./BUGS.md)
 
 ## Running locally
@@ -65,10 +66,10 @@ action after the game ends.
 
 ## Status
 
-| PR  | Scope                             | State       |
-| --- | --------------------------------- | ----------- |
-| 1   | Scaffold, CI, docs                | in progress |
-| 2   | Core rules engine + state machine |             |
-| 3   | AI + property tests               |             |
-| 4   | UI + play loop + accessibility    |             |
-| 5   | Hardening + documentation         |             |
+| PR  | Scope                                  | State     |
+| --- | -------------------------------------- | --------- |
+| 1   | Scaffold, CI, docs, rules primitives   | in review |
+| 2   | State machine, AI, property tests      | in review |
+| 3   | UI + play loop + accessibility         |           |
+| 4   | Hardening + documentation              |           |
+| 5   | Production smoke test + final bug pass |           |

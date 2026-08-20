@@ -202,7 +202,10 @@ h3 {
   height: 8rem;
   overflow-y: auto;
   margin: 0;
-  padding-left: 1.25rem;
+
+  /* Wide enough for a three-digit marker: the numbers sit in this padding, and anything
+     too narrow clips their leading digit rather than wrapping. */
+  padding-left: 2.25rem;
   font-size: 0.9rem;
 }
 

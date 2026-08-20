@@ -114,3 +114,21 @@ here names the test that now holds the behaviour in place.
   renumbering the older ones". The fixed height is CSS, so it was verified in a real
   browser instead: the log stayed 128px and the enemy board's document position was
   unchanged before and after every shot.
+
+## 6. Move 10 in the log displayed as "0"
+
+- **Symptom** — found by smoke-testing the deployed site. Once the move log reached ten
+  entries the newest line read "0. AI fired at J5 — hit." Every earlier move was numbered
+  correctly, so the log appeared to restart at zero midway through a game.
+- **Root cause** — the numbering was right and the markup said so (`<ol reversed
+start="10">`); it was the rendering that was wrong. An `<ol>` draws its markers outside
+  the list box, inside the left padding, and `.log` had `padding-left: 1.25rem` — 20px,
+  narrower than the 22.9px "10." needs — so the leading digit was clipped. The bug could
+  only appear after ten moves, which is why five sessions of manual play and a suite that
+  fires at most four shots per test never saw it.
+- **Fix** — `padding-left: 2.25rem`, wide enough for a three-digit marker (a game cannot
+  exceed 200 moves).
+- **Regression test** — `e2e/smoke.spec.ts`, "keeps two-digit move numbers legible". It
+  plays five shots to produce a ten-entry log and asserts the list's left padding is at
+  least as wide as its widest marker, measured in the log's own computed font. Restoring
+  `1.25rem` makes it fail with "Expected: >= 22.885894775390625, Received: 20".

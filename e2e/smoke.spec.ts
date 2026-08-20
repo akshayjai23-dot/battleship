@@ -58,4 +58,35 @@ test.describe('production build', () => {
       ratio: 1,
     });
   });
+
+  test('keeps two-digit move numbers legible', async ({ page }) => {
+    await page.getByRole('button', { name: 'Random layout' }).click();
+    await page.getByRole('button', { name: 'Start game' }).click();
+
+    const enemy = page.getByRole('region', { name: 'Enemy waters' });
+    const log = page.getByRole('list', { name: 'Move log' });
+
+    for (const square of ['A1', 'B1', 'C1', 'D1', 'E1']) {
+      await enemy.getByRole('button', { name: new RegExp(`^${square}, `) }).click();
+      await expect(page.getByRole('status')).toContainText('Your turn');
+    }
+
+    await expect(log.getByRole('listitem')).toHaveCount(10);
+
+    // Outside markers are drawn in the list's left padding, so too little of it silently
+    // clips the leading digit and move 10 reads as "0".
+    const room = await log.evaluate((list) => {
+      const style = getComputedStyle(list);
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      if (context === null) throw new Error('no 2d context');
+      context.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+      return {
+        padding: parseFloat(style.paddingLeft),
+        marker: context.measureText(`${list.children.length}.`).width,
+      };
+    });
+
+    expect(room.padding).toBeGreaterThanOrEqual(room.marker);
+  });
 });

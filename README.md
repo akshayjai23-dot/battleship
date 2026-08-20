@@ -2,9 +2,20 @@
 
 A browser Battleship game against an AI opponent.
 
-- **Play:** https://battleship-five-chi.vercel.app/ (the UI lands in PR #3; until then this
-  serves the scaffold placeholder)
+- **Play:** https://battleship-five-chi.vercel.app/ (serves the real game once PRs 1-4 are
+  merged to `main`)
 - **Bug log:** [BUGS.md](./BUGS.md)
+
+## How to play
+
+Pick a ship, click your own grid to drop it, and use **Rotate** to switch between
+horizontal and vertical — or press **Random layout** and skip the whole thing. The preview
+under the cursor is green where the ship fits and orange where it does not. Once all five
+ships are down, **Start game** fires. You shoot first; the AI replies after a short pause.
+Enemy ships stay hidden until you hit them, and a sunk ship reveals its whole hull.
+
+Everything works with the keyboard alone: every square is a button, so Tab moves between
+them and Enter or Space places a ship or takes a shot.
 
 ## Running locally
 
@@ -15,7 +26,13 @@ npm test           # unit + property tests (watch mode)
 npm run test:coverage
 npm run typecheck
 npm run lint
+
+npx playwright install chromium
+npm run test:e2e   # smoke test against the production build
 ```
+
+Node 22 is required (`.nvmrc`); Vite 8's native binaries are skipped on older versions,
+which makes the test run silently misbehave rather than fail loudly.
 
 ## Architecture
 
@@ -62,14 +79,19 @@ action after the game ends.
 - Property-based tests (fast-check) that play thousands of seeded AI-vs-AI games and
   assert the game's invariants after every single move.
 - Component tests (React Testing Library) for interaction and accessibility.
-- One end-to-end smoke test against the production build.
+- One end-to-end smoke test (Playwright) against the production build: it plays a turn
+  and asserts the whole game fits a 1024x768 screen, which is the one thing jsdom cannot
+  check because it has no layout engine.
+
+All of it runs in CI on every push.
 
 ## Status
 
-| PR  | Scope                                  | State     |
-| --- | -------------------------------------- | --------- |
-| 1   | Scaffold, CI, docs, rules primitives   | in review |
-| 2   | State machine, AI, property tests      | in review |
-| 3   | UI + play loop + accessibility         |           |
-| 4   | Hardening + documentation              |           |
-| 5   | Production smoke test + final bug pass |           |
+| PR  | Scope                                            | State     |
+| --- | ------------------------------------------------ | --------- |
+| 1   | Scaffold, CI, docs, rules primitives             | in review |
+| 2   | State machine, AI, property tests                | in review |
+| 3   | UI + play loop + accessibility                   | in review |
+| 4   | Production smoke test, hardening, final bug pass | in review |
+
+Each PR is stacked on the one before it, so they merge bottom-up.

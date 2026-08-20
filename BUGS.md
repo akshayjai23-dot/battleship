@@ -90,10 +90,11 @@ here names the test that now holds the behaviour in place.
   `@media (max-height: 46rem)`, which also lets the two boards sit side by side. Measured
   at a 992x639 viewport: `scrollHeight` 639 == `clientHeight` 639, both boards and every
   control fully in view.
-- **Regression test** — none automated, honestly. This is a CSS-in-a-real-browser defect
-  and jsdom has no layout engine, so a unit test asserting it would prove nothing. It is
-  covered instead by a documented manual check at 1024x768 @100% in
-  `.agents/skills/testing-battleship-ui/SKILL.md`.
+- **Regression test** — `e2e/smoke.spec.ts`, "fits a 1024x768 screen with every square
+  reachable". jsdom has no layout engine, so this one had to be a real browser: the test
+  loads the production build in a 992x639 viewport and asserts zero scroll overflow and
+  zero of the 200 board squares outside the viewport. Reverting `--cell` to its old value
+  makes it fail.
 
 ## 5. The boards jumped a row on every shot, and the move log renumbered itself
 
@@ -110,6 +111,6 @@ here names the test that now holds the behaviour in place.
   `reversed start={log.length}`, which counts _down_ from the move count so the oldest
   entry keeps the number 1.
 - **Regression test** — `src/App.test.tsx`, "shows the newest move first without
-  renumbering the older ones". The fixed height is CSS, so it is verified by the same
-  manual check as bug 4 (measured: the log stayed 128px and the enemy board's document
-  position was unchanged before and after every shot).
+  renumbering the older ones". The fixed height is CSS, so it was verified in a real
+  browser instead: the log stayed 128px and the enemy board's document position was
+  unchanged before and after every shot.

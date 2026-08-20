@@ -56,3 +56,6 @@ export type RejectionReason = 'off-board' | 'already-targeted';
 
 /** Why a proposed ship placement is illegal. */
 export type PlacementError = 'off-board' | 'overlap' | 'already-placed';
+
+/** Which player a board, shot or log entry belongs to. */
+export type Side = 'player' | 'ai';
